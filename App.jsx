@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react';
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function App() {
+  const [city, setCity] = useState('Loading...');
   const [location, setLocation] = useState();
   const [ok, setOk] = useState(true);
   const ask = async () => {
@@ -12,6 +13,9 @@ export default function App() {
     if(!granted){
       setOk(false);
     }
+    const {coords:{latitude, longitude}} = await Location.getCurrentPositionAsync({accuracy: 5});
+    const location = await Location.reverseGeocodeAsync({latitude, longitude}, {useGoogleMaps:false});
+    setCity(location[0].city);
   };
 
   useEffect(() => {
@@ -21,7 +25,7 @@ export default function App() {
   return (
     <View style={styles.container}>
       <View style={styles.city}>
-        <Text style={styles.cityName}>Seoul</Text>
+        <Text style={styles.cityName}>{city}</Text>
       </View>
 
       <ScrollView 
