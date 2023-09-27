@@ -1,9 +1,9 @@
-import { View, Text, StyleSheet, ScrollView, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Dimensions, ActivityIndicator } from 'react-native';
 import * as Location from 'expo-location';
 import React, { useEffect, useState } from 'react';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const API_KEY = "784ab24ff2ed5d94d4288abed9e25d13";
+const API_KEY = "05a5281064ecee2ba721afafe89720cd";
 //실제론 api key를 여기에 두면 안되고, 서버에서 관리해야함
 
 export default function App() {
@@ -20,9 +20,11 @@ export default function App() {
     const {coords:{latitude, longitude}} = await Location.getCurrentPositionAsync({accuracy: 5});
     const location = await Location.reverseGeocodeAsync({latitude, longitude}, {useGoogleMaps:false});
     setCity(location[0].city);
-    const response = fetch(`https://api.openweathermap.org/data/3.0/onecall?lat=${latitude}&lon=${longitude}&exclude=alerts&appid=${API_KEY}`);
-    const json = (await response).json();
-    setDays(json.daily);
+    const { list } = await (
+      await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&appid=${API_KEY}&units=metric`)
+      ).json();
+      const filteredList = list.filter(({ dt_txt }) => dt_txt.endsWith("00:00:00"));
+      setDays(filteredList);
   };
 
   useEffect(() => {
@@ -40,10 +42,19 @@ export default function App() {
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         contentContainerStylestyle={styles.weather}>
+        {days.length === 0 ? (
         <View style={styles.day}>
-          <Text style={styles.temp}>27</Text>
-          <Text style={styles.description}>Sunny</Text>
+          <ActivityIndicator color='black' size='large'/>
         </View>
+        ) : (
+        days.map((day, index) =>
+          <View key={index} style={styles.day}>
+            <Text style={styles.temp}>{parseFloat(day.main.temp).toFixed(1)}</Text>
+            <Text style={styles.description}>{day.weather[0].main}</Text>
+            <Text style={styles.tinyText}>{day.weather[0].description}</Text>
+          </View>
+        )
+        )}
       </ScrollView>
     </View>
   );
@@ -75,5 +86,8 @@ const styles = StyleSheet.create({
     marginTop: -30,
     fontSize: 50,
   },
+  tinyText: {
+    fontSize: 18,
+  }
 });
 
