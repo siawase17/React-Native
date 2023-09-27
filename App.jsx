@@ -1,9 +1,20 @@
 import { View, Text, StyleSheet, ScrollView, Dimensions } from 'react-native';
-import React from 'react';
+import * as Location from 'expo-location';
+import React, { useEffect, useState } from 'react';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function App() {
+  const [location, setLocation] = useState();
+  const [ok, setOk] = useState(true);
+  const ask = async () => {
+    const permition = await Location.requestForegroundPermissionsAsync();
+  };
+
+  useEffect(() => {
+    ask();
+  }, [])
+
   return (
     <View style={styles.container}>
       <View style={styles.city}>
@@ -46,12 +57,12 @@ const styles = StyleSheet.create({
     backgroundColor: 'yellow',
   },
   city: {
-    flex: 1.2,
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
   cityName: {
-    fontSize: 68,
+    fontSize: 50,
     fontWeight: '500',
   },
   day: {
