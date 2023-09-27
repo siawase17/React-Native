@@ -8,7 +8,10 @@ export default function App() {
   const [location, setLocation] = useState();
   const [ok, setOk] = useState(true);
   const ask = async () => {
-    const permition = await Location.requestForegroundPermissionsAsync();
+    const {granted} = await Location.requestForegroundPermissionsAsync();
+    if(!granted){
+      setOk(false);
+    }
   };
 
   useEffect(() => {
