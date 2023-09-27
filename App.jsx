@@ -3,12 +3,16 @@ import * as Location from 'expo-location';
 import React, { useEffect, useState } from 'react';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const API_KEY = "784ab24ff2ed5d94d4288abed9e25d13";
+//실제론 api key를 여기에 두면 안되고, 서버에서 관리해야함
 
 export default function App() {
   const [city, setCity] = useState('Loading...');
-  const [location, setLocation] = useState();
+  const [days, setDays] = useState([]);
   const [ok, setOk] = useState(true);
-  const ask = async () => {
+  
+
+  const getWeather = async () => {
     const {granted} = await Location.requestForegroundPermissionsAsync();
     if(!granted){
       setOk(false);
@@ -16,10 +20,13 @@ export default function App() {
     const {coords:{latitude, longitude}} = await Location.getCurrentPositionAsync({accuracy: 5});
     const location = await Location.reverseGeocodeAsync({latitude, longitude}, {useGoogleMaps:false});
     setCity(location[0].city);
+    const response = fetch(`https://api.openweathermap.org/data/3.0/onecall?lat=${latitude}&lon=${longitude}&exclude=alerts&appid=${API_KEY}`);
+    const json = (await response).json();
+    setDays(json.daily);
   };
 
   useEffect(() => {
-    ask();
+    getWeather();
   }, [])
 
   return (
@@ -33,22 +40,6 @@ export default function App() {
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         contentContainerStylestyle={styles.weather}>
-        <View style={styles.day}>
-          <Text style={styles.temp}>27</Text>
-          <Text style={styles.description}>Sunny</Text>
-        </View>
-        <View style={styles.day}>
-          <Text style={styles.temp}>27</Text>
-          <Text style={styles.description}>Sunny</Text>
-        </View>
-        <View style={styles.day}>
-          <Text style={styles.temp}>27</Text>
-          <Text style={styles.description}>Sunny</Text>
-        </View>
-        <View style={styles.day}>
-          <Text style={styles.temp}>27</Text>
-          <Text style={styles.description}>Sunny</Text>
-        </View>
         <View style={styles.day}>
           <Text style={styles.temp}>27</Text>
           <Text style={styles.description}>Sunny</Text>
